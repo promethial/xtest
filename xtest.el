@@ -8,7 +8,7 @@
 ;; Created: November 2, 2014
 ;; Version: 1.0.0
 ;; Keywords: testing, ERT
-;; Package-Requires: ((cl-lib ".5"))
+;; Package-Requires: ((cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
