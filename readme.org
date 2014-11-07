@@ -42,15 +42,15 @@ XTest verifying one-plus
                (2 4)
                (-1 -2)))
 
-;;; complies to 4 ert-deftest
+;;; compiles to 4 ert-deftest
 #+END_SRC
 
-XTest assertions are all contained in a macro called ~xt-deftest~. The positive assertions are wrapped in ~xtd-should~ with the function to be applied specified first, and the test case data following. Each list after the function is a test case. ~xt-add~ will be applied to each test case and verified as true in a seperate ~ert-deftest~.
+XTest assertions are all contained in a macro called ~xt-deftest~. The positive assertions are wrapped in ~xtd-should~ with the function to be applied specified first, and the test case data following. Each list after the function is a test case. ~xt-add~ will be applied to each test case and verified as true in a separate ~ert-deftest~.
 
 /Notice what XTest does differently than vanilla ERT:/
 1. DRY (Don't Repeat Yourself) - No need to repeat the macro ~should~ or the function ~one-plus~.
-2. One Assertion Per Test - Each test is created as a seperate ~ert-deftest~.
-3. Grouping - Conceptually similar tests can be grouped. For example, all ~should~ assertions can be grouped as ~xt-should~.
+2. One Assertion Per Test - Each test is created as a separate ~ert-deftest~.
+3. Grouping - Conceptually similar tests can be grouped. For example, all ~should~ assertions can be grouped as ~xtd-should~.
 
 The example ~xt-deftest~ above macro expands into the code below. Notice how each test case from above is expanded into a seperate ~ert-deftest~.
 
@@ -115,9 +115,9 @@ Defining a test that verifies the buffer-substring function.
 1. Install cl-lib.el (at the minimum version 0.5).
 2. Download xtest.el and place it in your path.
 *** Repo
-Coming soon...
+XTest is available to install via [[https://github.com/milkypostman/melpa/][MELPA]].
 ** Setup
-Once installed, add the following at the start of the file you need xtest.
+Once installed, add the following at the start of the file you need XTest.
 #+BEGIN_SRC emacs-lisp
 (require 'xtest)
 #+END_SRC
@@ -192,7 +192,7 @@ test = (initial-buffer-setup-string
 1. ~xt-note~ - is not processed by XTest and can be used leave comments or comment out other test groups.
 * References & Aside
 1. ERT - (Emacs Regression Testing) documentation: http://www.gnu.org/software/emacs/manual/html_node/ert/.
-2. For full rationale of why each test is enclosed in a sperate ERT instance see http://blog.jayfields.com/2007/06/testing-one-assertion-per-test.html
+2. For full rationale of why each test is enclosed in a separate ERT instance see http://blog.jayfields.com/2007/06/testing-one-assertion-per-test.html
 3. Emacs Lisp documentation uses the notation ~-!-~ as a stand in for the cursor as well, see https://www.gnu.org/software/emacs/manual/html_node/elisp/Buffer-Contents.html#Buffer-Contents for an example.
 * License
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
