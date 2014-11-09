@@ -26,7 +26,7 @@
 ;;; Commentary:
 
 ;;; Simple Testing with Emacs & ERT
-;;; 
+;;;
 ;;; For documentation refer to https://github.com/promethial/xtest
 
 ;;; Code:
@@ -89,14 +89,14 @@
   (intern (concat (symbol-name test-name) "-" (number-to-string test-num))))
 
 (defun xtest-construct-test (name test-number tests test-expression)
-  ""
+  "Constructs an ert-deftest for each test sepecified in a test group."
   `(progn ,@(mapcar (lambda (test) `(ert-deftest ,(xtest-construct-test-name name (cl-incf test-number))
                                    () "" ,(funcall test-expression test)))
                     tests)))
 
 (defun xtest-should= (test1 test2)
   "Test equality of TEST1 and TEST2."
-  (should (equal test1 test2)))
+  `(should (equal ,test1 ,test2)))
 
 ;;; Test Functions
 ;;; User Facing Functions
@@ -137,32 +137,38 @@
   (xtest-construct-test name test-num tests (lambda (test) `(should ,test))))
 
 (defmacro xtest-should-not (name test-num &rest tests)
-  "Assert all the TESTS are not true."
+  "Assert all the TESTS are nil."
   (xtest-construct-test name test-num tests (lambda (test) `(should-not ,test))))
 
 ;;; Data Based Test
 
-(defmacro xtest-data-should (name test-num general-func &rest tests)
-  "Assert all the TESTS are true."
-  `(progn ,@(mapcar (lambda (x) `(ert-deftest ,(xtest-construct-test-name name (cl-incf test-num))
-                                () "" (should (apply ,general-func ',x)))) tests)))
+(defmacro xtest-data-should (name test-num test-function &rest tests)
+  "Assert all the TESTS are true when TEST-FUNCTION is applied to each test in TESTS."
+  (xtest-construct-test name test-num tests (lambda (test) `(should (apply ,test-function ',test)))))
 
-(defmacro xtest-data-should-not (name test-num general-func &rest tests)
-  "Assert all the TESTS are true."
-  `(progn ,@(mapcar (lambda (x) `(ert-deftest ,(xtest-construct-test-name name (cl-incf test-num))
-                                () "" (should-not (apply ,general-func ',x)))) tests)))
+(defmacro xtest-data-should-not (name test-num test-function &rest tests)
+  "Assert all the TESTS are nil when TEST-FUNCTION is applied to each test in TESTS."
+  (xtest-construct-test name test-num tests (lambda (test) `(should-not (apply ,test-function ',test)))))
 
 ;;; Buffer & Data Based Test
 
-(defmacro xtest-data-setup= (name test-num general-func &rest tests)
+(defmacro xtest-data-setup= (name test-num test-function &rest tests)
   "Assert all the TESTS are true."
-  `(progn ,@(mapcar (lambda (x) `(ert-deftest ,(xtest-construct-test-name name (cl-incf test-num))
-                                () "" (xtest-should= (xtest-setup ,(cl-first x) (lambda () (funcall ,general-func ',(cl-third x)))) ,(cl-second x)))) tests)))
+  (xtest-construct-test name
+                        test-num
+                        tests
+                        (lambda (test) (xtest-should= `(xtest-setup ,(cl-first test)
+                                                               (lambda () (funcall ,test-function ',(cl-third test))))
+                                                 (cl-second test)))))
 
-(defmacro xtest-data-return= (name test-num general-func &rest tests)
+(defmacro xtest-data-return= (name test-num test-function &rest tests)
   "Assert all the TESTS are true."
-  `(progn ,@(mapcar (lambda (x) `(ert-deftest ,(xtest-construct-test-name name (cl-incf test-num))
-                                () "" (xtest-should= (xtest-return-setup ,(cl-first x) (lambda () (funcall ,general-func ',(cl-third x)))) ,(cl-second x)))) tests)))
+  (xtest-construct-test name
+                        test-num
+                        tests
+                        (lambda (test) (xtest-should= `(xtest-return-setup ,(cl-first test)
+                                                                      (lambda () (funcall ,test-function ',(cl-third test))))
+                                                 (cl-second test)))))
 
 ;;; Test Composer / Constructor Macro
 
