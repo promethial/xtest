@@ -132,28 +132,28 @@
 
 ;;; General Test
 
-(defmacro xtest-should (name test-num &rest tests)
+(defun xtest-should (name test-num &rest tests)
   "Assert all the TESTS are true."
   (xtest-construct-test name test-num tests (lambda (test) `(should ,test))))
 
-(defmacro xtest-should-not (name test-num &rest tests)
+(defun xtest-should-not (name test-num &rest tests)
   "Assert all the TESTS are nil."
   (xtest-construct-test name test-num tests (lambda (test) `(should-not ,test))))
 
 ;;; Data Based Test
 
-(defmacro xtest-data-should (name test-num test-function &rest tests)
+(defun xtest-data-should (name test-num test-function &rest tests)
   "Assert all the TESTS are true when TEST-FUNCTION is applied to each test in TESTS."
   (xtest-construct-test name test-num tests (lambda (test) `(should (apply ,test-function ',test)))))
 
-(defmacro xtest-data-should-not (name test-num test-function &rest tests)
+(defun xtest-data-should-not (name test-num test-function &rest tests)
   "Assert all the TESTS are nil when TEST-FUNCTION is applied to each test in TESTS."
   (xtest-construct-test name test-num tests (lambda (test) `(should-not (apply ,test-function ',test)))))
 
 ;;; Buffer & Data Based Test
 
-(defmacro xtest-data-setup= (name test-num test-function &rest tests)
-  "Assert all the TESTS are true."
+(defun xtest-data-setup= (name test-num test-function &rest tests)
+  "Assert the buffer produced by applying TEST-FUNCTION in the buffer specified by each test in TESTS is equal to the expected buffer output."
   (xtest-construct-test name
                         test-num
                         tests
@@ -161,8 +161,8 @@
                                                                (lambda () (funcall ,test-function ',(cl-third test))))
                                                  (cl-second test)))))
 
-(defmacro xtest-data-return= (name test-num test-function &rest tests)
-  "Assert all the TESTS are true."
+(defun xtest-data-return= (name test-num test-function &rest tests)
+  "Assert the value returned by applying TEST-FUNCTION to each test in TEST is true."
   (xtest-construct-test name
                         test-num
                         tests
@@ -178,10 +178,10 @@
   (let ((test-num 0)
         ;; Remove xt-note instances from TESTS list since they are not evaluated
         (actual-tests (cl-remove-if (lambda (test) (equal 'xt-note (cl-first test))) test-groups)))
-    `(progn ,@(mapcar (lambda (x) (prog1 `(,(cl-rest (assq (cl-first x) xtest-external-internal-func-map))
-                                      ,base-test-name
-                                      ,test-num
-                                      ,@(cl-rest x))
+    `(progn ,@(mapcar (lambda (x) (prog1 (apply (cl-rest (assq (cl-first x) xtest-external-internal-func-map))
+                                           (append (list base-test-name
+                                                         test-num)
+                                                   (cl-rest x)))
                                (cl-incf test-num (if (string-match-p (regexp-quote "xtd")
                                                                      (symbol-name (cl-first x)))
                                                      (- (length (cl-rest x)) 1)
