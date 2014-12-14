@@ -50,14 +50,18 @@
 ;;; Buffer setup & testing helper functions.
 
 (defun xtest-buffer-setup (initial-string)
-  "Create a buffer with the contents of INITIAL-STRING and replace the first xt-cursor appearance with actual cursor."
+  "Create a buffer with the contents of INITIAL-STRING and replace the first
+xt-cursor appearance with actual cursor."
   (insert initial-string)
   (if (search-backward xt-cursor nil t)
       (replace-match "")
     (goto-char (point-min))))
 
 (defun xtest-setup (initial-string action)
-  "Insert INITIAL-STRING into a temporary buffer, replaces -!- with the cursor, runs the function ACTION, and returns the contents of the buffer as a string. If cursor position is not specified using -!-, the cursor is placed at the beginning of the temporary buffer."
+  "Insert INITIAL-STRING into a temporary buffer, replaces -!- with the cursor,
+runs the function ACTION, and returns the contents of the buffer as a string.
+If cursor position is not specified using -!-, the cursor is placed at the 
+beginning of the temporary buffer."
   (with-temp-buffer
     (xtest-buffer-setup initial-string)
     (funcall action)
@@ -65,7 +69,8 @@
     (buffer-string)))
 
 (defun xtest-return-setup (initial-string action)
-  "Creates a temporary buffer with the contents of INTITIAL-STRING, places the cursor where specified, and executes the function ACTION."
+  "Creates a temporary buffer with the contents of INTITIAL-STRING,
+places the cursor where specified, and executes the function ACTION."
   (with-temp-buffer
     (xtest-buffer-setup initial-string)
     (funcall action)))
@@ -85,13 +90,14 @@
   "Mapping user facing functions to internal macro representations.")
 
 (defun xtest-construct-test-name (test-name test-num)
-  "Returns a unique test symbol name based on the overall test name appended with a dash and a number to the end of the test name."
+  "Returns a unique test symbol name based on the overall test name
+appended with a dash and a number to the end of the test name."
   (intern (concat (symbol-name test-name) "-" (number-to-string test-num))))
 
 (defun xtest-construct-test (name test-number tests test-expression)
   "Constructs an ert-deftest for each test sepecified in a test group."
   `(progn ,@(mapcar (lambda (test) `(ert-deftest ,(xtest-construct-test-name name (cl-incf test-number))
-                                   () "" ,(funcall test-expression test)))
+                                        () "" ,(funcall test-expression test)))
                     tests)))
 
 (defun xtest-should= (test1 test2)
@@ -102,31 +108,41 @@
 ;;; User Facing Functions
 
 (defun xt-should (&rest tests)
-  "Asserts all test expressions in TESTS evaluate to true. Each expression will be expanded into a separate ert-deftest.")
+  "Asserts all test expressions in TESTS evaluate to true.
+Each expression will be expanded into a separate ert-deftest.")
 
 (defun xt-should! (&rest tests)
-  "Asserts all test expressions in TESTS evaluate to nil. Each expression will be expanded into a separate ert-deftest.")
+  "Asserts all test expressions in TESTS evaluate to nil.
+Each expression will be expanded into a separate ert-deftest.")
 
 ;;; Data Functions
 
 (defun xtd-should (test-function &rest tests)
-  "Asserts when TEST-FUNCTION is applied to each test in TESTS this returns true. The TEST-FUNCTION must accept as many arguments as each test supplies.")
+  "Asserts when TEST-FUNCTION is applied to each test in TESTS this returns true.
+The TEST-FUNCTION must accept as many arguments as each test supplies.")
 
 (defun xtd-should! (test-function &rest tests)
-  "Asserts when TEST-FUNCTION is applied to each test in TESTS this returns nil. The TEST-FUNCTION must accept as many arguments as each test supplies.")
+  "Asserts when TEST-FUNCTION is applied to each test in TESTS this returns nil.
+The TEST-FUNCTION must accept as many arguments as each test supplies.")
 
 ;;; Buffer Functions
 
 (defun xtd-setup= (test-function &rest tests)
-  "TEST-FUNCTION is applied to each temporary buffer created by tests. The resulting buffer is turned back into a string with the cursor replaced with xt-cursor. The resulting string is asserted to see if it is equal to the second argument in the TESTS. Each test in tests must have the form below. ")
+  "TEST-FUNCTION is applied to each temporary buffer created by tests.
+The resulting buffer is turned back into a string with the cursor replaced with
+xt-cursor. The resulting string is asserted to see if it is equal to the second
+argument in the TESTS. Each test in tests must have the form below. ")
 
 (defun xtd-return= (test-function &rest tests)
-  "TEST-FUNCTION is applied to each temporary buffer created by tests. The value returned by TEST-FUNCTION is asserted to be equal to the second argument in the test list. Equality is checked using the equal function.")
+  "TEST-FUNCTION is applied to each temporary buffer created by tests.
+The value returned by TEST-FUNCTION is asserted to be equal to the second
+argument in the test list. Equality is checked using the equal function.")
 
 ;;; Comment
 
 (defun xt-note (&rest comments)
-  "Is not processed by XTest and can be used leave comments or comment out other test groups. ")
+  "Is not processed by XTest and can be used leave comments or comment out other
+test groups. ")
 
 ;;; Internal Functions / Actual Implementation
 
@@ -153,12 +169,14 @@
 ;;; Buffer & Data Based Test
 
 (defun xtest-data-setup= (name test-num test-function &rest tests)
-  "Assert the buffer produced by applying TEST-FUNCTION in the buffer specified by each test in TESTS is equal to the expected buffer output."
+  "Assert the buffer produced by applying TEST-FUNCTION in the buffer specified by
+each test in TESTS is equal to the expected buffer output."
   (xtest-construct-test name
                         test-num
                         tests
                         (lambda (test) (xtest-should= `(xtest-setup ,(cl-first test)
-                                                               (lambda () (funcall ,test-function ',(cl-third test))))
+                                                               (lambda () (funcall ,test-function
+                                                                              ',(cl-third test))))
                                                  (cl-second test)))))
 
 (defun xtest-data-return= (name test-num test-function &rest tests)
@@ -167,7 +185,8 @@
                         test-num
                         tests
                         (lambda (test) (xtest-should= `(xtest-return-setup ,(cl-first test)
-                                                                      (lambda () (funcall ,test-function ',(cl-third test))))
+                                                                      (lambda () (funcall ,test-function
+                                                                                     ',(cl-third test))))
                                                  (cl-second test)))))
 
 ;;; Test Composer / Constructor Macro
